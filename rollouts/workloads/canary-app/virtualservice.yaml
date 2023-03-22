@@ -5,7 +5,7 @@ metadata:
   namespace: demo
 spec:
   gateways:
-  - canary-gateway
+  - quinoa-wind-turbine-gateway
   hosts:
   - "*"
   http:

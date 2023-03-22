@@ -1,0 +1,38 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  annotations:
+    pipeline.openshift.io/started-by: admin
+  name: wind-turbine-pipeline-run
+  namespace: demo
+  labels:
+    tekton.dev/pipeline: wind-turbine-pipeline
+    triggers.tekton.dev/eventlistener: wind-turbine
+spec:
+  params:
+    - name: GIT_REPO
+      value: 'https://github.com/redhat-developer-demos/quinoa-wind-turbine.git'
+    - name: GIT_BRANCH
+      value: b55065e7a2f00a9c960ebe29db5eb6d49a83e1d8
+  pipelineRef:
+    name: wind-turbine-pipeline
+  serviceAccountName: pipeline
+  timeout: 1h0m0s
+  workspaces:
+    - name: source
+      persistentVolumeClaim:
+        claimName: app-source
+    - name: maven-repo
+      persistentVolumeClaim:
+        claimName: build-cache-pvc
+      subPath: maven-repo
+    - name: node-cache
+      persistentVolumeClaim:
+        claimName: build-cache-pvc
+      subPath: node-cache
+    - name: npm-repo
+      persistentVolumeClaim:
+        claimName: build-cache-pvc
+      subPath: npm-repo
+    - emptyDir: {}
+      name: maven-settings

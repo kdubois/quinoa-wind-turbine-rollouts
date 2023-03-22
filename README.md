@@ -50,14 +50,14 @@ You should see this
 Update the `workloads/canary-app/kustomization.yaml` file from `blue` to `yellow`. Edit the file by hand but if you're brave, you can run a `sed` on the file.
 
 ```shell
-sed -i 's/blue/yellow/g' workloads/canary-app/kustomization.yaml
+sed -i 's/click/shake/g' workloads/canary-app/kustomization.yaml
 ```
 
 Then commit/push to your fork
 
 ```shell
 git add .
-git commit -am "yellow"
+git commit -am "shake"
 git push
 ```
 
@@ -66,10 +66,9 @@ git push
 Get status using the plugin (running a `watch` is helpful)
 
 ```shell
-oc argo rollouts get rollout rollouts-demo -n canary
+oc argo rollouts get rollout rollouts-demo -n demo
 ```
 
-You'll see that the blue squares turn into yellow ones. It increases every 15 (or so) seconds until you're fully yellow
 
 ## Auto-Rollback
 
@@ -77,17 +76,17 @@ In the UI, you'll see a slider that causes the application to return a 500 error
 
 ![500err](https://i.ibb.co/LzzWqX4/witherr.jpg)
 
-Change the application back to blue
+Change the application back to click
 
 ```shell
-sed -i 's/yellow/blue/g' workloads/canary-app/kustomization.yaml
+sed -i 's/shake/click/g' workloads/canary-app/kustomization.yaml
 ```
 
 Commit and push...
 
 ```shell
 git add .
-git commit -am "blue with errors"
+git commit -am "click with errors"
 git push
 ```
 

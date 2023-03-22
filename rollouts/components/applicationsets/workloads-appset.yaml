@@ -6,10 +6,10 @@ metadata:
 spec:
   generators:
   - git:
-      repoURL: https://github.com/kdubois/ocp-sm-ar
+      repoURL: https://github.com/kdubois/quinoa-wind-turbine-rollouts
       revision: main
       directories:
-      - path: workloads/*
+      - path: rollouts/workloads/*
   template:
     metadata:
       name: '{{path.basename}}'
@@ -33,7 +33,7 @@ spec:
             factor: 2
             maxDuration: 5m
       source:
-        repoURL: https://github.com/kdubois/ocp-sm-ar
+        repoURL: https://github.com/kdubois/quinoa-wind-turbine-rollouts
         targetRevision: main
         path: '{{path}}'
       destination:
