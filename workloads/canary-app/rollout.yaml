@@ -1,0 +1,82 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: rollouts-demo
+  namespace: demo
+spec:
+  replicas: 10
+  revisionHistoryLimit: 1
+  minReadySeconds: 5
+  selector:
+    matchLabels:
+      app: rollouts-demo
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "true"
+      labels:
+        app: rollouts-demo
+    spec:
+      containers:
+      - env:
+        - name: QUARKUS_PROFILE
+          value: openshift-cluster
+        - name: QUARKUS_PROFILE
+          value: openshift-cluster
+        - name: INFINISPAN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: infinispan-generated-secret
+        name: rollouts-demo
+        image: quay.io/rhdevelopers/quinoa-wind-turbine:1.0.0
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+        - containerPort: 8443
+          protocol: TCP
+        readinessProbe:
+          httpGet:
+            scheme: HTTP
+            path: /q/health/ready
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        livenessProbe:
+          httpGet:
+            scheme: HTTP
+            path: /q/health/live
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 5
+  strategy:
+    canary:
+      analysis:
+        startingStep: 2 # delay starting analysis run until setWeight: 40
+        args:
+        - name: service-name
+          value: rollouts-demo-canary.canary.svc.cluster.local
+        templates:
+          - templateName: success-rate
+      canaryService: rollouts-demo-canary
+      stableService: rollouts-demo-stable
+      trafficRouting:
+        istio:
+          virtualService:
+            name: rollout-vsvc
+            routes:
+            - primary
+      steps:
+      - setWeight: 30
+      - pause: { duration: 20s }
+      - setWeight: 40
+      - pause: { duration: 10s }
+      - setWeight: 60
+      - pause: { duration: 10s }
+      - setWeight: 80
+      - pause: { duration: 5s }
+      - setWeight: 90
+      - pause: { duration: 5s }
+      - setWeight: 100
+      - pause: { duration: 5s }
