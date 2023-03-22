@@ -1,6 +1,6 @@
 # OpenShift Service Mesh with Argo Rollouts
 
-Example Repo that does what the title says. You can watch a demo of this repo: [HERE](https://youtu.be/DfeL7cdTx4c)
+Argo Rollouts with Openshift Service mesh to deploy the quinoa-wind-turbine game 
 
 # Prereqs
 
@@ -24,7 +24,7 @@ After editing the [Application Sets in this directory](components/applicationset
 > **NOTE** Errors are expected in this step. Go get some coffee, go for a walk, then comeback to this.
 
 ```shell
-until oc apply -k bootstrap/overlays/default/; do sleep 15; done
+until oc apply -k rollouts/bootstrap/overlays/default/; do sleep 15; done
 ```
 
 ## See the App
@@ -41,16 +41,13 @@ Then open in browser, example
 firefox $GATEWAY_URL
 ```
 
-You should see this
-
-![sample-app](https://i.ibb.co/G2gY1b5/sample-app.png)
 
 ## Make update
 
-Update the `workloads/canary-app/kustomization.yaml` file from `blue` to `yellow`. Edit the file by hand but if you're brave, you can run a `sed` on the file.
+Update the `workloads/canary-app/kustomization.yaml` file from `tap` to `shake`. Edit the file by hand but if you're brave, you can run a `sed` on the file.
 
 ```shell
-sed -i 's/click/shake/g' workloads/canary-app/kustomization.yaml
+sed -i 's/tap/shake-with-errors/g' workloads/canary-app/kustomization.yaml
 ```
 
 Then commit/push to your fork
@@ -72,30 +69,26 @@ oc argo rollouts get rollout rollouts-demo -n demo
 
 ## Auto-Rollback
 
-In the UI, you'll see a slider that causes the application to return a 500 error
-
-![500err](https://i.ibb.co/LzzWqX4/witherr.jpg)
-
-Change the application back to click
+Change the application back to tap, but this time apply an istio config that produces random errors
 
 ```shell
-sed -i 's/shake/click/g' workloads/canary-app/kustomization.yaml
+sed -i 's/shake/tap/g' workloads/canary-app/kustomization.yaml
 ```
 
 Commit and push...
 
 ```shell
 git add .
-git commit -am "click with errors"
+git commit -am "back to tap, but with errors"
 git push
 ```
 
 Initiate the rollout by refreshing the Argo CD "canary-app" Application. This will initiate a rollout.
 
-Once the rollout has started, slide the error slider on the application to 100% and watch as the rollout fails
+Once the rollout has started, apply a new istio config with errors
 
 ```shell
-oc argo rollouts get rollout rollouts-demo -n canary
+oc apply -f workloads/canary-app/virtualservicewitherrors.yaml
 ```
 
 It should fail and it should look something like this...
@@ -120,10 +113,14 @@ NAME                                       KIND         STATUS        AGE    INF
 │  │  └──□ rollouts-demo-785bb66569-w7w6w  Pod          ✔ Running     11m    ready:2/2
 ```
 
-Your app should have failed back to being all yellow since you had errors during the rollout. To restart/fix this. Move the error slider to 0% and restart the rollout.
+Your app should have failed back to shaking since you had errors during the rollout. To restart/fix this, apply the virtualservice.yaml again and then:
+
+```shell
+oc apply -f workloads/canary-app/virtualservice.yaml
+```
 
 ```shell
 oc argo rollouts retry rollout rollouts-demo -n canary
 ```
 
-This time, the rollout should finish and you should have blue squares.
+This time, the rollout should finish and you should have tapping again.
