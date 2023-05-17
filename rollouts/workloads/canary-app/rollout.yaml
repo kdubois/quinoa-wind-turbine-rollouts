@@ -3,6 +3,8 @@ kind: Rollout
 metadata:
   name: rollouts-demo
   namespace: demo
+  annotations:
+    argocd.argoproj.io/sync-wave: "32"
 spec:
   replicas: 6
   revisionHistoryLimit: 1

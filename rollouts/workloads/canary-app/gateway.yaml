@@ -2,6 +2,8 @@ apiVersion: networking.istio.io/v1alpha3
 kind: Gateway
 metadata:
   name: quinoa-wind-turbine-gateway
+  annotations:
+    argocd.argoproj.io/sync-wave: "31"
   namespace: demo
 spec:
   selector:

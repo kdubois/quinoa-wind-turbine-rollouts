@@ -11,7 +11,7 @@ This repo assumes that this is a "fresh" cluster. Don't run these steps on a pro
 
 # Testing
 
-Highlevel steps to test. These steps assumes you know Argo CD, Argo Rollouts, Istio, and Kubernetes quite a bit.
+Highlevel steps to test. These steps assumes you know a little bit about Argo CD, Argo Rollouts, Istio, and Kubernetes.
 
 ## Fork the repo
 
@@ -21,7 +21,7 @@ First, fork this repo. You will need to change the [Application Sets in this dir
 
 After editing the [Application Sets in this directory](components/applicationsets)  to point to your fork, apply it to your OCP cluster
 
-> **NOTE** Errors are expected in this step. Go get some coffee, go for a walk, then comeback to this.
+> **NOTE** Errors are expected in this step. Go get some coffee, go for a walk, then come back to this.
 
 ```shell
 until oc apply -k rollouts/bootstrap/overlays/default/; do sleep 15; done
@@ -35,19 +35,18 @@ You should see the app on your browser; first export your Gateway
 export GATEWAY_URL=$(oc -n istio-system get route istio-ingressgateway -o jsonpath='{.spec.host}')
 ```
 
-Then open in browser, example
+Then open in browser, example for accessing the dashboard:
 
 ```shell
-firefox $GATEWAY_URL
+firefox $GATEWAY_URL/dashboard
 ```
-
 
 ## Make update
 
 Update the `workloads/canary-app/kustomization.yaml` file from `tap` to `shake`. Edit the file by hand but if you're brave, you can run a `sed` on the file.
 
 ```shell
-sed -i 's/tap/shake-with-errors/g' workloads/canary-app/kustomization.yaml
+sed -i 's/tap/shake/g' workloads/canary-app/kustomization.yaml
 ```
 
 Then commit/push to your fork
@@ -69,7 +68,7 @@ oc argo rollouts get rollout rollouts-demo -n demo
 
 ## Auto-Rollback
 
-Change the application back to tap, but this time apply an istio config that produces random errors
+Change the application back to tap, but this time we'll apply an istio config that produces random errors
 
 ```shell
 sed -i 's/shake/tap/g' workloads/canary-app/kustomization.yaml
